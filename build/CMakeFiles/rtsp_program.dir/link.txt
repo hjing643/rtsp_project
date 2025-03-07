@@ -1,0 +1,1 @@
+/bin/cc  -g    CMakeFiles/rtsp_program.dir/src/main.o  -o rtsp_program -rdynamic -lavformat -lavcodec -lavutil -lswscale 

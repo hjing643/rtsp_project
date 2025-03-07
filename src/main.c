@@ -13,19 +13,32 @@ void print_error(const char* message, int error_code) {
 
 int main() {
 
-    const char* rtsp_url = "rtsp://admin:Vmspro135@10.20.103.98:554/cam/realmonitor?channel=1&subtype=0";
-    const char* output_file = "./output/output1.h264";
+	printf("FFmpeg version: %s\n", av_version_info());
+	av_register_all();
+    	const char* rtsp_url = "rtsp://admin:Vmspro135@10.20.103.98:554/cam/realmonitor?channel=1&subtype=0";
+	//const char* rtsp_url ="rtsp://admin:12345@10.199.13.41:8888/stream";  
+ const char* output_file = "./output1.h264";
 
     AVFormatContext* format_ctx = NULL;
     AVPacket packet;
     FILE* output_fp = NULL;
 
     // 初始化 FFmpeg 网络库
-    avformat_network_init();
+    if (avformat_network_init() < 0)
+	{
+		print_error("init network failed", -1);
+		return -1;
+	}
+
+
+//AVDictionary* options = NULL;
+//av_dict_set(&options, "rtsp_transport", "tcp", 0);  // 强制使用 TCP 传输
 
     // 打开输入流
-    if (avformat_open_input(&format_ctx, rtsp_url, NULL, NULL) < 0) {
-        print_error("无法打开输入流", -1);
+    int ret = avformat_open_input(&format_ctx, rtsp_url, NULL, NULL);
+if (ret < 0) {
+	printf("open input failed:%d,%s\n", ret,rtsp_url);
+        print_error("无法打开输入流", ret);
         return -1;
     }
 

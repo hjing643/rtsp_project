@@ -15,7 +15,7 @@ set(CMAKE_BUILD_TYPE Debug)
 #set release + debug infor
 #set(CMAKE_BUILD_TYPE RelWithDebInfo)
 #add source file, cpp file add to parameter SOURCES
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.c")
 
 # 添加库的头文件
 
@@ -50,6 +50,8 @@ message(STATUS "FFmpeg libraries: ${FFMPEG_LIBRARIES}")
 
 # 添加 FFmpeg 的头文件路径
 include_directories(${FFMPEG_INCLUDE_DIRS})
+
+#set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 # 生成可执行文件
 add_executable(rtsp_program ${SOURCES})
