@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <fcntl.h>  // 包含 fcntl 函数和 F_GETFL 标志的定义
 
 int client_socket = -1;
 
@@ -50,22 +51,52 @@ int ConnectToServer(char* ptr_ip, int port)
     return client_socket;
 }
 
-void SendRTPStream(const char* ptr_data, int data_len)
+int SendRTPStream(const char* file_path)
 {
     if(ConnectToServer("10.199.28.221", 8888) < 0)
-    {
+    {    
+        remove(file_path);
+        printf("ConnectToServer failed\n");
         return;
     }
-     // 发送数据
-    int bytes_sent = send(client_socket, ptr_data, data_len, 0);
-    if (bytes_sent < 0) {
-        perror("Send failed");
-        return;
+    else{
+        printf("ConnectToServer success\n");
     }
-    const char* ptr_end = "huangjingyf";
-    int bytes_sent2 = send(client_socket, ptr_end, strlen(ptr_end), 0);
 
-    printf("Sent len: %d-%d\n",data_len + strlen(ptr_end), bytes_sent + bytes_sent2);
+     // 读取文件并发送
+    FILE* file = fopen(file_path, "rb");
+    if (!file) {
+        remove(file_path);
+        perror("无法打开文件\n");
+        return -1;
+    }
+
+    //int flags = fcntl(client_socket, F_GETFL, 0);
+    //fcntl(client_socket, F_SETFL, flags | O_NONBLOCK);
+
+    char buffer[4096];
+    size_t bytes_read;
+    while ((bytes_read = fread(buffer, 1, sizeof(buffer), file)) > 0) {
+        if (send(client_socket, buffer, bytes_read, 0) < 0) {
+            perror("发送数据失败\n");
+            break;
+        }
+
+        const char* ptr_end = "huangjingyf";
+        int bytes_sent2 = send(client_socket, ptr_end, strlen(ptr_end), 0);
+    }
+
+    const char* ptr_end2 = "aaaaahuangjingyf";
+    int bytes_sent22 = send(client_socket, ptr_end2, strlen(ptr_end2), 0);
+    // 释放资源
+    fclose(file);
+    remove(file_path);
+
+    //close(client_socket);
+    //client_socket = -1;
+
+    printf("Sent success\n");
+    return 0;
 }
 
 
@@ -110,7 +141,7 @@ void parse_nalu(const uint8_t* data, int size) {
             break;
         }
 
-        SendRTPStream(data_start, nalu_length + add);
+        //SendRTPStream(data_start, nalu_length + add);
 
         // 解析 NALU 头
         uint8_t nal_unit_type = nalu_start[0] & 0x1F;  // 取低 5 位
@@ -128,7 +159,7 @@ static int write_packet(void* opaque, uint8_t* buf, int buf_size) {
     // 这里可以将数据发送到网络或其他地方
     printf("Received %d bytes of data\n", buf_size);
     
-    SendRTPStream(buf, buf_size);
+    //SendRTPStream(buf, buf_size);
 
     return buf_size;  // 返回实际处理的字节数
 }
@@ -136,29 +167,26 @@ static int write_packet(void* opaque, uint8_t* buf, int buf_size) {
 int main() {
 
     const char* rtsp_url = "rtsp://admin:Vmspro135@10.20.103.98:554/cam/realmonitor?channel=1&subtype=0";
-     AVFormatContext* input_ctx = NULL;
-    AVFormatContext* output_ctx = NULL;
-    AVPacket packet;
-    int ret;
-
+    
     // 初始化 FFmpeg 库
     av_register_all();
     avformat_network_init();
 
     // 设置 RTSP 传输协议为 TCP
-    AVDictionary* options = NULL;
-    av_dict_set(&options, "rtsp_transport", "tcp", 0);
-
+    //AVDictionary* options = NULL;
+    //av_dict_set(&options, "rtsp_transport", "tcp", 0);
+    
+    AVFormatContext* input_ctx = NULL;
     // 打开输入流
-    ret = avformat_open_input(&input_ctx, rtsp_url, NULL, &options);
-    if (ret < 0) {
-        fprintf(stderr, "无法打开输入流\n");
+    int ret_input = avformat_open_input(&input_ctx, rtsp_url, NULL, NULL);
+    if (ret_input < 0) {
+        print_error("无法打开输入流", ret_input);
         return -1;
     }
 
     // 获取流信息
     if (avformat_find_stream_info(input_ctx, NULL) < 0) {
-        fprintf(stderr, "无法获取流信息\n");
+        print_error("无法获取流信息", -1);
         avformat_close_input(&input_ctx);
         return -1;
     }
@@ -166,82 +194,104 @@ int main() {
     // 打印输入流信息
     av_dump_format(input_ctx, 0, rtsp_url, 0);
 
-    // 创建输出上下文
-    avformat_alloc_output_context2(&output_ctx, NULL, "mp4", NULL);
-    if (!output_ctx) {
-        fprintf(stderr, "无法创建输出上下文\n");
-        avformat_close_input(&input_ctx);
-        return -1;
-    }
+    // 读取数据包并写入输出文件
+    int file_index = 1;
+    while (1)
+    {
+        if (file_index >= 100)
+        {
+            file_index = 0;
+        }
+        
+        char output_file[256];
+        snprintf(output_file, sizeof(output_file), "./output_%d.mp4", file_index++);
+        
+        
+        AVFormatContext* output_ctx = NULL;
+        AVPacket packet;
+        int ret;
+        // 创建输出上下文
+        ret = avformat_alloc_output_context2(&output_ctx, NULL, NULL, output_file);
+        if (ret < 0) {
+            print_error("无法创建输出上下文", ret);
+            avformat_close_input(&input_ctx);
+            return -1;
+        }
 
-    // 复制流信息
-    int i = 0;
-    for (i = 0; i < input_ctx->nb_streams; i++) {
-        AVStream* in_stream = input_ctx->streams[i];
-        AVStream* out_stream = avformat_new_stream(output_ctx, NULL);
-        if (!out_stream) {
-            fprintf(stderr, "无法创建输出流\n");
+        // 复制流信息
+        int i = 0;
+        for (i = 0; i < input_ctx->nb_streams; i++) {
+            AVStream* in_stream = input_ctx->streams[i];
+            AVStream* out_stream = avformat_new_stream(output_ctx, NULL);
+            if (!out_stream) {
+                fprintf(stderr, "无法创建输出流\n");
+                avformat_close_input(&input_ctx);
+                avformat_free_context(output_ctx);
+                return -1;
+            }
+            avcodec_parameters_copy(out_stream->codecpar, in_stream->codecpar);
+            out_stream->codecpar->codec_tag = 0;  // 避免编码器标签冲突
+        }
+
+        // 打开输出文件
+        if (!(output_ctx->oformat->flags & AVFMT_NOFILE)) {
+            ret = avio_open(&output_ctx->pb, output_file, AVIO_FLAG_WRITE);
+            if (ret < 0) {
+                print_error("无法打开输出文件", ret);
+                avformat_close_input(&input_ctx);
+                avformat_free_context(output_ctx);
+                return -1;
+            }
+        }
+
+        // 写入文件头
+        ret = avformat_write_header(output_ctx, NULL);
+        if (ret < 0) {
+            print_error("无法写入文件头", ret);
             avformat_close_input(&input_ctx);
             avformat_free_context(output_ctx);
             return -1;
         }
-        avcodec_parameters_copy(out_stream->codecpar, in_stream->codecpar);
-        out_stream->codecpar->codec_tag = 0;  // 避免编码器标签冲突
-    }
+        
+        int write_index = 1;
+        while (av_read_frame(input_ctx, &packet) >= 0) {
+            AVStream* in_stream = input_ctx->streams[packet.stream_index];
+            AVStream* out_stream = output_ctx->streams[packet.stream_index];
 
-    // 创建自定义 IO 上下文
-    uint8_t* io_buffer = (uint8_t*)av_malloc(4096);  // 缓冲区
-    AVIOContext* avio_ctx = avio_alloc_context(
-        io_buffer, 4096, 1, NULL, NULL, write_packet, NULL);
-    if (!avio_ctx) {
-        fprintf(stderr, "无法创建自定义 IO 上下文\n");
-        avformat_close_input(&input_ctx);
-        avformat_free_context(output_ctx);
-        return -1;
-    }
-    output_ctx->pb = avio_ctx;  // 将自定义 IO 上下文赋值给输出上下文
+            // 调整时间戳
+            packet.pts = av_rescale_q_rnd(packet.pts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
+            packet.dts = av_rescale_q_rnd(packet.dts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
+            packet.duration = av_rescale_q(packet.duration, in_stream->time_base, out_stream->time_base);
+            packet.pos = -1;
 
-    // 写入文件头
-    ret = avformat_write_header(output_ctx, NULL);
-    if (ret < 0) {
-        fprintf(stderr, "无法写入文件头\n");
-        avformat_close_input(&input_ctx);
-        avformat_free_context(output_ctx);
-        return -1;
-    }
+            // 写入数据包
+            ret = av_interleaved_write_frame(output_ctx, &packet);
+            if (ret < 0) {
+                print_error("写入数据包失败", ret);
+                break;
+            }
+            av_packet_unref(&packet);
 
-    // 读取数据包并写入输出
-    while (av_read_frame(input_ctx, &packet) >= 0) {
-        AVStream* in_stream = input_ctx->streams[packet.stream_index];
-        AVStream* out_stream = output_ctx->streams[packet.stream_index];
-
-        // 调整时间戳
-        packet.pts = av_rescale_q_rnd(packet.pts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
-        packet.dts = av_rescale_q_rnd(packet.dts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
-        packet.duration = av_rescale_q(packet.duration, in_stream->time_base, out_stream->time_base);
-        packet.pos = -1;
-
-        // 写入数据包
-        ret = av_interleaved_write_frame(output_ctx, &packet);
-        if (ret < 0) {
-            fprintf(stderr, "写入数据包失败\n");
-            break;
+            if (write_index++ > 600) //600 times around 20s 
+            {
+                break;
+            }
         }
 
-        av_packet_unref(&packet);
+        // 写入文件尾
+        av_write_trailer(output_ctx);
+
+        // 释放资源
+        if (output_ctx && !(output_ctx->oformat->flags & AVFMT_NOFILE)) {
+            avio_closep(&output_ctx->pb);
+        }
+        avformat_free_context(output_ctx);
+
+        printf("RTSP 流已保存到 %s\n", output_file);
+
+        SendRTPStream(output_file);
     }
 
-    // 写入文件尾
-    av_write_trailer(output_ctx);
-
-    // 释放资源
     avformat_close_input(&input_ctx);
-    if (output_ctx && !(output_ctx->oformat->flags & AVFMT_NOFILE)) {
-        avio_closep(&output_ctx->pb);
-    }
-    avformat_free_context(output_ctx);
-    av_dict_free(&options);
-
-    printf("RTSP 流转封装完成\n");
     return 0;
 }

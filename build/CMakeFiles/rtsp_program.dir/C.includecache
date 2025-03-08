@@ -19,6 +19,8 @@ unistd.h
 -
 arpa/inet.h
 -
+fcntl.h
+-
 
 /usr/include/ffmpeg/libavcodec/avcodec.h
 errno.h
