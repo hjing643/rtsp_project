@@ -164,7 +164,16 @@ static int write_packet(void* opaque, uint8_t* buf, int buf_size) {
     return buf_size;  // 返回实际处理的字节数
 }
 
-int main() {
+int main(int argc, char* argv[])
+ {
+    int cache_count = 300;
+     // 将参数存储到变量中
+    if (argc > 1) {
+        printf("Input 1: %s\n", argv[1]);
+        cache_count = atoi(argv[1]);
+    } else {
+        printf("no Input arg\n");
+    }
 
     const char* rtsp_url = "rtsp://admin:Vmspro135@10.20.103.98:554/cam/realmonitor?channel=1&subtype=0";
     
@@ -222,6 +231,9 @@ int main() {
         int i = 0;
         for (i = 0; i < input_ctx->nb_streams; i++) {
             AVStream* in_stream = input_ctx->streams[i];
+            if (in_stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+                continue;  // 跳过音频流
+            }
             AVStream* out_stream = avformat_new_stream(output_ctx, NULL);
             if (!out_stream) {
                 fprintf(stderr, "无法创建输出流\n");
@@ -256,8 +268,12 @@ int main() {
         int write_index = 1;
         while (av_read_frame(input_ctx, &packet) >= 0) {
             AVStream* in_stream = input_ctx->streams[packet.stream_index];
+            
+            if (in_stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+                continue;  // 跳过音频流
+            }
+                        
             AVStream* out_stream = output_ctx->streams[packet.stream_index];
-
             // 调整时间戳
             packet.pts = av_rescale_q_rnd(packet.pts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
             packet.dts = av_rescale_q_rnd(packet.dts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
@@ -272,7 +288,7 @@ int main() {
             }
             av_packet_unref(&packet);
 
-            if (write_index++ > 600) //600 times around 20s 
+            if (write_index++ > cache_count) //600 times around 20s 
             {
                 break;
             }
@@ -287,11 +303,10 @@ int main() {
         }
         avformat_free_context(output_ctx);
 
-        printf("RTSP 流已保存到 %s\n", output_file);
+        printf("RTSP 流已保存到 %s, cache: %d\n", output_file, cache_count);
 
         SendRTPStream(output_file);
     }
-
     avformat_close_input(&input_ctx);
     return 0;
 }
