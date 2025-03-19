@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
         printf("no Input arg\n");
     }
 
-    const char* rtsp_url = "rtsp://admin:Vmspro135@10.20.103.98:554/cam/realmonitor?channel=1&subtype=0";
+    const char* rtsp_url = "rtsp://admin:Vmspro135@10.20.103.251:554/cam/realmonitor?channel=1&subtype=0";
     
     // 初始化 FFmpeg 库
     av_register_all();
