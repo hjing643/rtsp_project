@@ -1,0 +1,65 @@
+CONNECTED(00000003)
+---
+Certificate chain
+ 0 s:CN = *.hikshowroom.co.uk
+   i:C = GB, ST = Greater Manchester, L = Salford, O = Sectigo Limited, CN = Sectigo RSA Domain Validation Secure Server CA
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Mar 20 00:00:00 2025 GMT; NotAfter: Apr 20 23:59:59 2026 GMT
+-----BEGIN CERTIFICATE-----
+MIIGQjCCBSqgAwIBAgIQF+AMOhPNYMg45X9Nr0/ozTANBgkqhkiG9w0BAQsFADCB
+jzELMAkGA1UEBhMCR0IxGzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4G
+A1UEBxMHU2FsZm9yZDEYMBYGA1UEChMPU2VjdGlnbyBMaW1pdGVkMTcwNQYDVQQD
+Ey5TZWN0aWdvIFJTQSBEb21haW4gVmFsaWRhdGlvbiBTZWN1cmUgU2VydmVyIENB
+MB4XDTI1MDMyMDAwMDAwMFoXDTI2MDQyMDIzNTk1OVowHjEcMBoGA1UEAwwTKi5o
+aWtzaG93cm9vbS5jby51azCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+ALAcsaPMHryRJQcbFMUBhMF3SD3zEHVcQUvWh9GXPa/hhRI499MaN2kFoxHrSCHO
+qxPzlmk2rdmVEOCT1lLnrx94ShhuB++C29Zaa9ANs7kM98H/J8JxbppQ7yychkJT
+SUix2qk0IzlA9OH8UVeEN9cUcBKzMR5nx1v33VADcpL+7rufwaxmLdi9esu7DinV
+xzDpfdFs0vJfvVRibJWDWVdZySEGZOTl2GNfScoUp6OEkodNV96kTMF5wcXkWNBd
+VpTjTVQX3IpnNKJ5OvYpAZi/kyKhahiw9jUL/i5WoCnXH3tKpoom4M44QytACkdb
+WibijkR4gk8eLVCPQ93YuwECAwEAAaOCAwgwggMEMB8GA1UdIwQYMBaAFI2MXsRU
+rYrhd+mb+ZsF4bgBjWHhMB0GA1UdDgQWBBSC0LBNz3mm4xozZI48ZPzUKl978DAO
+BgNVHQ8BAf8EBAMCBaAwDAYDVR0TAQH/BAIwADAdBgNVHSUEFjAUBggrBgEFBQcD
+AQYIKwYBBQUHAwIwSQYDVR0gBEIwQDA0BgsrBgEEAbIxAQICBzAlMCMGCCsGAQUF
+BwIBFhdodHRwczovL3NlY3RpZ28uY29tL0NQUzAIBgZngQwBAgEwgYQGCCsGAQUF
+BwEBBHgwdjBPBggrBgEFBQcwAoZDaHR0cDovL2NydC5zZWN0aWdvLmNvbS9TZWN0
+aWdvUlNBRG9tYWluVmFsaWRhdGlvblNlY3VyZVNlcnZlckNBLmNydDAjBggrBgEF
+BQcwAYYXaHR0cDovL29jc3Auc2VjdGlnby5jb20wMQYDVR0RBCowKIITKi5oaWtz
+aG93cm9vbS5jby51a4IRaGlrc2hvd3Jvb20uY28udWswggF+BgorBgEEAdZ5AgQC
+BIIBbgSCAWoBaAB2AJaXZL9VWJet90OHaDcIQnfp8DrV9qTzNm5GpD8PyqnGAAAB
+lbRRTBIAAAQDAEcwRQIgZCai8gRKx+gn0pAOiUaKnFqLYc3VUq/5NF8xSHyPn28C
+IQCiqVT3JRDUAIt5mdv8TmVG1/z8d0yMSNVhUzP+t3v2LwB2ABmG1Mcoqm/+ugNv
+eCpNAZGqzi1yMQ+uzl1wQS0lTMfUAAABlbRRS6kAAAQDAEcwRQIhAM/6DN/E4CoC
+0xJQskpwKh9g2fvLd6HwDWVU9nvS9LO8AiBvFCrasSqBkX9YmDQvz/PU+3ikXpmo
+DJlA28AhnwPDegB2AMs49xWJfIShRF9bwd37yW7ymlnNRwppBYWwyxTDFFjnAAAB
+lbRRS9kAAAQDAEcwRQIgEb5frQ/W/mR2WJq8xKFj/l+OpNozejc4DoLM8NY8IscC
+IQCVz88i/0hl6Osx29YnLAfZYlcISCFocxGHV3Jgm87ZCzANBgkqhkiG9w0BAQsF
+AAOCAQEAtOGbiaaTW+atvuP3cqQn7i9ex6Vq5eou0zSDrfx26HR/MWCHcElh3wnT
+TNSiW/bvk3fQNlsrG1fQZ6nPwPzu6NvbZkilIbMhXvdEdrByrTTiDvuMifN33NJE
+eUL9fmWUpfYUE8YvD493peb83OC9p6qVNuT1ml//s7oo+CqppGnqPwXjIM+Wlpmy
+r7Jut19gkFB5fEroz63x0KnzLQUnpSvEIDzp9LtqqPM7n8/JdnenK+DaECKXA8da
+ge4ObyreiFYCMiHWkZKP0zPqr7vzl2yon9hvKjIY+DfNuUcBZ3RGZ+U2/KTDW+gu
+RfyyMolFYURGLD81n4WoaKHIZXSOwg==
+-----END CERTIFICATE-----
+---
+Server certificate
+subject=CN = *.hikshowroom.co.uk
+issuer=C = GB, ST = Greater Manchester, L = Salford, O = Sectigo Limited, CN = Sectigo RSA Domain Validation Secure Server CA
+---
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: RSA-PSS
+Server Temp Key: X25519, 253 bits
+---
+SSL handshake has read 2162 bytes and written 408 bytes
+Verification error: unable to verify the first certificate
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Server public key is 2048 bit
+Secure Renegotiation IS NOT supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 21 (unable to verify the first certificate)
+---
